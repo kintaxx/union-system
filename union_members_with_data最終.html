@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カンツリー交通労働組合 管理システム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1a2744;--navy-mid:#2c3e6b;--gold:#b8963e;--gold-light:#d4b06a;--cream:#f8f5ef;--white:#fff;--gray-100:#f4f4f4;--gray-200:#e8e8e8;--gray-400:#999;--gray-600:#555;--red:#c0392b;--green:#1a6b3c;--shadow:0 4px 24px rgba(26,39,68,.10);--radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh}
+header{background:var(--navy);color:#fff;padding:0 28px;display:flex;align-items:center;gap:16px;height:60px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100}
+header .logo{font-family:'Noto Serif JP',serif;font-size:1.05rem;font-weight:700;letter-spacing:.07em;color:var(--gold-light)}
+header .sub{font-size:.72rem;color:rgba(255,255,255,.5)}
+header .spacer{flex:1}
+header .hbadge{background:var(--gold);color:var(--navy);font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px}
+.tabs{display:flex;background:var(--navy-mid);padding:0 28px;overflow-x:auto}
+.tab-btn{padding:11px 18px;font-size:.82rem;font-family:'Noto Sans JP',sans-serif;font-weight:500;color:rgba(255,255,255,.6);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;letter-spacing:.04em;transition:all .18s;white-space:nowrap}
+.tab-btn:hover{color:rgba(255,255,255,.9)}
+.tab-btn.active{color:var(--gold-light);border-bottom-color:var(--gold);background:rgba(255,255,255,.05)}
+.main{max-width:1200px;margin:0 auto;padding:24px 18px}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 26px;margin-bottom:18px;border-top:3px solid var(--gold)}
+.card-title{font-family:'Noto Serif JP',serif;font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';display:inline-block;width:4px;height:15px;background:var(--gold);border-radius:2px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px 16px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:1/-1}
+label{font-size:.75rem;font-weight:500;color:var(--gray-600);letter-spacing:.04em}
+input,select{border:1.5px solid var(--gray-200);border-radius:6px;padding:8px 10px;font-size:.87rem;font-family:'Noto Sans JP',sans-serif;color:var(--navy);background:var(--gray-100);transition:border .15s;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--gold);background:#fff}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-size:.82rem;font-family:'Noto Sans JP',sans-serif;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--navy-mid)}
+.btn-gold{background:var(--gold);color:var(--navy)}.btn-gold:hover{background:var(--gold-light)}
+.btn-danger{background:transparent;color:var(--red);border:1.5px solid var(--red);padding:5px 11px;font-size:.75rem}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:5px 11px;font-size:.75rem}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+.btn-outline:hover{background:var(--navy);color:#fff}
+.form-actions{margin-top:16px;display:flex;gap:9px;flex-wrap:wrap}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead tr{background:var(--navy);color:#fff}
+thead th{padding:9px 11px;text-align:left;font-weight:500;letter-spacing:.04em;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--gray-200);transition:background .1s}
+tbody tr:hover{background:#f0eeea}
+tbody td{padding:8px 11px;vertical-align:middle}
+.b-active{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;background:#e6f4ee;color:var(--green)}
+.b-sick{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;background:#f8d7da;color:var(--red)}
+.b-hiatus{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;background:#fff3cd;color:#856404}
+.b-retired{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;background:#e8e8e8;color:#666}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:18px}
+.sum-card{background:#fff;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);border-left:4px solid var(--gold)}
+.sum-card .sl{font-size:.71rem;color:var(--gray-400);margin-bottom:4px;font-weight:500}
+.sum-card .sv{font-size:1.45rem;font-weight:700;color:var(--navy);font-family:'Noto Serif JP',serif}
+.remark-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:7px}
+.remark-row{display:flex;align-items:center;gap:9px;padding:6px 9px;border:1px solid var(--gray-200);border-radius:6px;background:var(--gray-100);font-size:.82rem}
+.remark-row .empno{color:var(--gray-400);font-family:monospace;font-size:.78rem;min-width:38px}
+.remark-row .rname{flex:1;font-weight:500}
+.remark-row .rtype{font-size:.71rem;color:var(--gray-400);white-space:nowrap}
+.remark-row select{width:120px;padding:4px 6px;font-size:.76rem}
+.hl-byo{background:#fff0f0;border-color:#f5c6cb}
+.hl-son{background:#fff8e1;border-color:#ffe082}
+.hl-shj{background:#e8f4fd;border-color:#90caf9}
+.hl-tai{background:#f3f3f3;border-color:#ccc}
+.hl-kyu{background:#f3e5f5;border-color:#ce93d8}
+.filter-bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.filter-bar select,.filter-bar input{width:auto;min-width:125px;font-size:.8rem;padding:6px 8px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s;z-index:999}
+.toast.show{opacity:1}.toast.gold{border-left:4px solid var(--gold)}
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:12px;padding:26px;width:min(500px,94vw);box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Noto Serif JP',serif;font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:16px;border-left:4px solid var(--gold);padding-left:9px}
+.fee-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.fee-item{display:flex;gap:7px;align-items:center}
+.fee-item input{flex:1}.fee-item input[type=number]{max-width:120px}
+.empty-msg{text-align:center;color:var(--gray-400);padding:32px 0;font-size:.87rem}
+
+/* ===== PRINT ===== */
+#print-area{display:none}
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block!important}
+  @page{size:A4 landscape;margin:8mm 10mm}
+  /* 白紙ページ完全防止 */
+  .print-page{page-break-after:always;page-break-inside:avoid}
+  .print-page:last-child{page-break-after:avoid!important}
+  /* ヘッダー */
+  .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2pt solid #1a2744;margin-bottom:7pt;padding-bottom:4pt}
+  .ph h1{font-family:'Noto Serif JP',serif;font-size:11pt;color:#1a2744;font-weight:700}
+  .ph .phr{text-align:right;font-size:7pt;color:#555}
+  .ph .phrg{font-size:7.5pt;color:#1a2744;font-weight:700}
+  /* 帳票①レイアウト */
+  .s1-wrap{display:grid;grid-template-columns:1fr 200pt;gap:8pt}
+  /* 共通テーブル */
+  .pt{width:100%;border-collapse:collapse;font-size:7pt}
+  .pt th{background:#1a2744;color:#fff;padding:3.5pt 4pt;text-align:left;font-weight:600;white-space:nowrap}
+  .pt td{padding:3pt 4pt;border-bottom:.3pt solid #ccc;vertical-align:middle}
+  .pt tr:nth-child(even) td{background:#f8f5ef}
+  .byo{color:#c0392b;font-weight:700}
+  .son{color:#856404}
+  .shj{color:#0066cc;font-weight:700}
+  .tai{color:#999}.kyu{color:#7b1fa2}
+  .tc{text-align:center}.tr{text-align:right}
+  /* 右側ボックス */
+  .sb{border:1pt solid #1a2744;border-radius:2pt;overflow:hidden;margin-bottom:6pt}
+  .sb-h{background:#1a2744;color:#fff;font-size:7.5pt;font-weight:700;padding:3.5pt 5pt}
+  .sb-t{width:100%;border-collapse:collapse;font-size:7.5pt}
+  .sb-t th{background:#e8e4dc;padding:3.5pt 5pt;text-align:left;font-size:7pt;font-weight:600;border-bottom:.5pt solid #bbb}
+  .sb-t td{padding:3.5pt 5pt;border-bottom:.3pt solid #ddd}
+  .sb-t .tot td{background:#1a2744;color:#fff;font-weight:700;font-size:8pt}
+  .stat-tbl{width:100%;border-collapse:collapse;font-size:8pt;border:1pt solid #ccc}
+  .stat-tbl th{padding:4pt 6pt;font-weight:700;border-bottom:.5pt solid #ccc;font-size:7.5pt}
+  .stat-tbl td{padding:3pt 6pt;font-size:11pt;font-family:'Noto Serif JP',serif;font-weight:700}
+  .st-bl{background:#1a7ab5;color:#fff}.st-rd{background:#c0392b;color:#fff}.st-gy{background:#f0f0f0;color:#1a2744}
+  .byobox{border:1pt solid #f5c6cb;border-radius:2pt;overflow:hidden;margin-bottom:5pt}
+  .byobox-h{background:#c0392b;color:#fff;font-size:7pt;font-weight:700;padding:3pt 5pt}
+  .byobox-t{width:100%;border-collapse:collapse;font-size:7pt}
+  .byobox-t td{padding:2.5pt 4pt;border-bottom:.3pt solid #f5c6cb}
+  .sjbox{border:1pt solid #90caf9;border-radius:2pt;overflow:hidden;margin-top:5pt}
+  .sjbox-h{background:#1a7ab5;color:#fff;font-size:7pt;font-weight:700;padding:3pt 5pt}
+  .sjbox-t{width:100%;border-collapse:collapse;font-size:7pt}
+  .sjbox-t td{padding:2.5pt 4pt;border-bottom:.3pt solid #90caf9}
+  /* 帳票②③共通（3列） */
+  .ct-wrap{columns:3;column-gap:9pt}
+  .ct{width:100%;border-collapse:collapse;font-size:6.5pt;break-inside:avoid;display:table}
+  .ct th{background:#1a2744;color:#fff;padding:3pt 3.5pt;font-size:6pt;font-weight:600}
+  .ct td{padding:2.5pt 3.5pt;border-bottom:.3pt solid #ddd;white-space:nowrap}
+  .ct tr:nth-child(even) td{background:#f8f5ef}
+  /* 種別グループヘッダー */
+  .ct-group-head td{background:#2c3e6b!important;color:#fff!important;font-weight:700!important;font-size:7pt!important;padding:4pt 3.5pt!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">カンツリー交通労働組合</div>
+    <div class="sub">組合員管理・帳票出力システム</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="hbadge" id="hdr-date"></div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="sw('dashboard',this)">📊 ダッシュボード</button>
+  <button class="tab-btn" onclick="sw('members',this)">👥 組合員一覧</button>
+  <button class="tab-btn" onclick="sw('register',this)">✚ 新規登録</button>
+  <button class="tab-btn" onclick="sw('monthly',this)">📝 月次備考</button>
+  <button class="tab-btn" onclick="sw('print',this)">🖨 帳票出力</button>
+  <button class="tab-btn" onclick="sw('settings',this)">⚙ 設定</button>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="panel-dashboard" class="panel active">
+  <div class="sum-grid" id="sum-grid"></div>
+  <div class="card">
+    <div class="card-title">種別別集計（当月）</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>種別</th><th>在籍</th><th>病欠(状態)</th><th>休会</th><th>今月 病欠</th><th>今月 その他</th><th>今月 新入</th><th>単価</th><th>月額小計</th></tr></thead>
+        <tbody id="dash-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERS -->
+<div id="panel-members" class="panel">
+  <div class="card">
+    <div class="card-title">組合員一覧</div>
+    <div class="filter-bar">
+      <select id="f-status" onchange="renderMtbl()">
+        <option value="">すべての状態</option>
+        <option value="active">在籍</option>
+        <option value="sick">病欠</option>
+        <option value="hiatus">休会</option>
+        <option value="retired">退会</option>
+      </select>
+      <select id="f-fee" onchange="renderMtbl()"><option value="">すべての種別</option></select>
+      <input type="text" id="f-search" placeholder="コード・氏名で検索" oninput="renderMtbl()" style="min-width:160px">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>コード</th><th>氏名</th><th>フリガナ</th><th>種別</th><th>状態</th><th>入会日</th><th>退会日</th><th>今月備考</th><th>操作</th></tr></thead>
+        <tbody id="m-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="panel-register" class="panel">
+  <div class="card">
+    <div class="card-title">新規組合員登録</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>コード番号（社員番号）*</label>
+        <input type="text" id="reg-empno" placeholder="例：1162" maxlength="6" style="font-family:monospace;letter-spacing:.1em">
+      </div>
+      <div class="form-group"><label>氏名 *</label><input type="text" id="reg-name" placeholder="山田 太郎"></div>
+      <div class="form-group"><label>フリガナ</label><input type="text" id="reg-kana" placeholder="ヤマダ タロウ"></div>
+      <div class="form-group"><label>会費種別 *</label><select id="reg-fee"></select></div>
+      <div class="form-group"><label>入会日 *</label><input type="date" id="reg-date"></div>
+      <div class="form-group"><label>状態</label>
+        <select id="reg-status"><option value="active">在籍</option><option value="sick">病欠</option><option value="hiatus">休会</option></select>
+      </div>
+      <div class="form-group"><label>備考</label><input type="text" id="reg-note" placeholder="任意"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="registerMember()">登録する</button>
+      <button class="btn btn-outline" onclick="clearRegForm()">クリア</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY -->
+<div id="panel-monthly" class="panel">
+  <div class="card">
+    <div class="card-title">月次備考入力</div>
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
+      <div class="form-group" style="width:160px">
+        <label>対象年月</label>
+        <input type="month" id="mon-month" onchange="renderMonthly()">
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="fltMon('')">全員</button>
+        <button class="btn btn-sm" style="background:#fff0f0;border:1px solid #f5c6cb;color:#c0392b;font-weight:700" onclick="fltMon('病欠')">病欠のみ</button>
+        <button class="btn btn-sm" style="background:#fff8e1;border:1px solid #ffe082;color:#856404;font-weight:700" onclick="fltMon('その他')">その他</button>
+        <button class="btn btn-sm" style="background:#e8f4fd;border:1px solid #90caf9;color:#0066cc;font-weight:700" onclick="fltMon('新入')">新入</button>
+        <button class="btn btn-sm" style="background:#f3e5f5;border:1px solid #ce93d8;color:#7b1fa2;font-weight:700" onclick="fltMon('休会')">休会</button>
+        <button class="btn btn-sm" style="background:#fce4ec;border:1px solid #f48fb1;color:#c0392b;font-weight:700" onclick="fltMon('退会')">退会</button>
+        <button class="btn btn-primary" onclick="saveMon()">💾 保存</button>
+      </div>
+    </div>
+    <p style="font-size:.76rem;color:var(--gray-400);margin-bottom:10px">コード順で表示。各人の備考を選択し「保存」を押してください。</p>
+    <div id="mon-list" class="remark-grid"></div>
+  </div>
+</div>
+
+<!-- PRINT -->
+<div id="panel-print" class="panel">
+  <div class="card">
+    <div class="card-title">帳票出力</div>
+    <div class="form-grid">
+      <div class="form-group"><label>出力年月</label><input type="month" id="print-month" style="width:160px"></div>
+    </div>
+    <div class="form-actions" style="margin-top:14px">
+      <button class="btn btn-primary" onclick="doP1()">🖨 帳票①：給与天引き確認書</button>
+      <button class="btn btn-gold" onclick="doP2()">🖨 帳票②：コード番号表（入社日順）</button>
+      <button class="btn btn-outline" onclick="doP3()">🖨 帳票③：コード番号表（種別順）</button>
+      <button class="btn btn-outline" onclick="doBoth()">🖨 全帳票まとめて印刷</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">帳票の内容</div>
+    <p style="font-size:.84rem;color:var(--gray-600);line-height:1.9">
+      <strong>帳票① A4横向き</strong>：給与天引き確認書<br>
+      　左：出勤者リスト（コード順）　右上：種別別金額集計　右下：病欠者・新入一覧<br><br>
+      <strong>帳票② A4横向き</strong>：組合員コード番号表（入社日順）<br>
+      　全組合員を3列表示・種別・備考を色付きで表示<br><br>
+      <strong>帳票③ A4横向き</strong>：組合員コード番号表（種別順）<br>
+      　種別ごとにグループ分けして3列表示
+    </p>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="panel-settings" class="panel">
+  <div class="card">
+    <div class="card-title">組合・会社情報</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>組合名</label><input type="text" id="set-org" placeholder="カンツリー交通労働組合"></div>
+      <div class="form-group full"><label>会社・部署名（帳票右上）</label><input type="text" id="set-company" placeholder="カンツリー交通労働組合　組織部"></div>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="saveSettings()">保存</button></div>
+  </div>
+  <div class="card">
+    <div class="card-title">会費種別設定</div>
+    <div id="fee-list" class="fee-list"></div>
+    <button class="btn btn-outline btn-sm" onclick="addFT()">＋ 種別を追加</button>
+    <div class="form-actions"><button class="btn btn-primary" onclick="saveFTs()">会費設定を保存</button></div>
+  </div>
+  <div class="card" style="border-top-color:#c0392b">
+    <div class="card-title">データ管理</div>
+    <div class="form-actions">
+      <button class="btn btn-outline btn-sm" onclick="expData()">📤 エクスポート（JSON）</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer">📥 インポート<input type="file" accept=".json" onchange="impData(event)" style="display:none"></label>
+    </div>
+  </div>
+</div>
+
+</div><!-- .main -->
+<div id="print-area"></div>
+<div class="toast" id="toast"></div>
+
+<!-- EDIT MODAL -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-title">組合員情報編集</div>
+    <div class="form-grid">
+      <div class="form-group"><label>コード番号</label><input type="text" id="edit-empno" maxlength="6" style="font-family:monospace"></div>
+      <div class="form-group"><label>氏名</label><input type="text" id="edit-name"></div>
+      <div class="form-group full"><label>フリガナ</label><input type="text" id="edit-kana" placeholder="ヤマダ タロウ"></div>
+      <div class="form-group"><label>会費種別</label><select id="edit-fee"></select></div>
+      <div class="form-group"><label>状態</label>
+        <select id="edit-status">
+          <option value="active">在籍</option>
+          <option value="sick">病欠</option>
+          <option value="hiatus">休会</option>
+          <option value="retired">退会</option>
+        </select>
+      </div>
+      <div class="form-group"><label>入会日</label><input type="date" id="edit-join"></div>
+      <div class="form-group"><label>退会日</label><input type="date" id="edit-leave"></div>
+      <div class="form-group full"><label>備考</label><input type="text" id="edit-note"></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let members=[],feeTypes=[],monthlyData={},settings={orgName:'カンツリー交通労働組合',company:'カンツリー交通労働組合　組織部'};
+let editingId=null,monFilter='';
+
+function load(){
+  try{
+    members=JSON.parse(localStorage.getItem('kc_m')||'[]');
+    feeTypes=JSON.parse(localStorage.getItem('kc_f')||'[]');
+    monthlyData=JSON.parse(localStorage.getItem('kc_mon')||'{}');
+    const s=localStorage.getItem('kc_s');if(s)settings=JSON.parse(s);
+  }catch(e){}
+  if(!feeTypes.length) feeTypes=[
+    {id:'f1',name:'正社員',amount:8000},
+    {id:'f2',name:'嘱託12',amount:7000},
+    {id:'f3',name:'定時制8',amount:6000},
+    {id:'f4',name:'その他',amount:3000}
+  ];
+}
+function persist(){
+  localStorage.setItem('kc_m',JSON.stringify(members));
+  localStorage.setItem('kc_f',JSON.stringify(feeTypes));
+  localStorage.setItem('kc_mon',JSON.stringify(monthlyData));
+  localStorage.setItem('kc_s',JSON.stringify(settings));
+}
+
+// ===== UTILS =====
+function genId(){return 'm'+Date.now()+Math.random().toString(36).slice(2,5)}
+function fmtD(d){return d?d.replace(/-/g,'/'):'—'}
+function getFT(id){return feeTypes.find(f=>f.id===id)||null}
+function curMon(){return new Date().toISOString().slice(0,7)}
+function getR(mid,mon){return(monthlyData[mon]||{})[mid]||''}
+function setR(mid,mon,v){if(!monthlyData[mon])monthlyData[mon]={};monthlyData[mon][mid]=v}
+function toast(msg,tp=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(tp?' '+tp:'');
+  setTimeout(()=>t.className='toast',2200);
+}
+function sw(n,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');btn.classList.add('active');
+  if(n==='dashboard')renderDash();
+  if(n==='members')renderMtbl();
+  if(n==='register')popFS('reg-fee');
+  if(n==='monthly')renderMonthly();
+  if(n==='settings')renderSettings();
+}
+
+// ===== DASHBOARD =====
+function renderDash(){
+  const mon=document.getElementById('mon-month')?.value||curMon();
+  const act=members.filter(m=>m.status==='active');
+  const sick=members.filter(m=>m.status==='sick');
+  const hit=members.filter(m=>m.status==='hiatus');
+  const ret=members.filter(m=>m.status==='retired');
+  const byo=act.filter(m=>getR(m.id,mon)==='病欠');
+  const shj=act.filter(m=>getR(m.id,mon)==='新入');
+  const tot=[...act,...sick].reduce((s,m)=>{const f=getFT(m.feeTypeId);return s+(f?f.amount:0)},0);
+  document.getElementById('sum-grid').innerHTML=`
+    <div class="sum-card"><div class="sl">在籍組合員</div><div class="sv">${act.length}<small style="font-size:.85rem"> 名</small></div></div>
+    <div class="sum-card" style="border-color:#c0392b"><div class="sl">病欠中</div><div class="sv" style="color:#c0392b">${sick.length}<small style="font-size:.85rem"> 名</small></div></div>
+    <div class="sum-card" style="border-color:#856404"><div class="sl">休会中</div><div class="sv" style="color:#856404">${hit.length}<small style="font-size:.85rem"> 名</small></div></div>
+    <div class="sum-card" style="border-color:#999"><div class="sl">退会済</div><div class="sv" style="color:#999">${ret.length}<small style="font-size:.85rem"> 名</small></div></div>
+    <div class="sum-card" style="border-color:#1a6b3c"><div class="sl">月額会費合計</div><div class="sv" style="font-size:1.25rem;color:#1a6b3c">¥${tot.toLocaleString()}</div></div>
+    <div class="sum-card" style="border-color:#0066cc"><div class="sl">今月 新入</div><div class="sv" style="color:#0066cc">${shj.length}<small style="font-size:.85rem"> 名</small></div></div>
+  `;
+  let grand=0;
+  document.getElementById('dash-tbody').innerHTML=feeTypes.map(ft=>{
+    const an=act.filter(m=>m.feeTypeId===ft.id).length;
+    const skn=sick.filter(m=>m.feeTypeId===ft.id).length;
+    const hn=hit.filter(m=>m.feeTypeId===ft.id).length;
+    const bn=act.filter(m=>m.feeTypeId===ft.id&&getR(m.id,mon)==='病欠').length;
+    const sn=act.filter(m=>m.feeTypeId===ft.id&&getR(m.id,mon)==='その他').length;
+    const jn=act.filter(m=>m.feeTypeId===ft.id&&getR(m.id,mon)==='新入').length;
+    const sub=(an+skn)*ft.amount;grand+=sub;
+    return `<tr><td>${ft.name}</td><td>${an}名</td><td>${skn?`<span style="color:#c0392b;font-weight:700">${skn}名</span>`:'—'}</td><td>${hn?hn+'名':'—'}</td>
+      <td>${bn?`<span style="color:#c0392b;font-weight:700">${bn}名</span>`:'—'}</td>
+      <td>${sn?sn+'名':'—'}</td><td>${jn?`<span style="color:#0066cc;font-weight:700">${jn}名</span>`:'—'}</td>
+      <td>¥${ft.amount.toLocaleString()}</td><td><strong>¥${sub.toLocaleString()}</strong></td></tr>`;
+  }).join('')+`<tr style="background:var(--navy);color:#fff;font-weight:700">
+    <td colspan="8" style="color:#fff">合　計</td>
+    <td style="color:var(--gold-light)">¥${grand.toLocaleString()}</td></tr>`;
+}
+
+// ===== MEMBER TABLE =====
+function renderMtbl(){
+  const fsel=document.getElementById('f-fee');const cv=fsel.value;
+  fsel.innerHTML='<option value="">すべての種別</option>'+feeTypes.map(ft=>`<option value="${ft.id}"${ft.id===cv?' selected':''}>${ft.name}</option>`).join('');
+  const sf=document.getElementById('f-status').value;
+  const ff=document.getElementById('f-fee').value;
+  const kw=document.getElementById('f-search').value.trim().toLowerCase();
+  const mon=document.getElementById('mon-month')?.value||curMon();
+  const list=members.filter(m=>{
+    if(sf&&m.status!==sf)return false;
+    if(ff&&m.feeTypeId!==ff)return false;
+    if(kw&&!(m.name.toLowerCase().includes(kw)||(m.empNo||'').includes(kw)||(m.kana||'').toLowerCase().includes(kw)))return false;
+    return true;
+  }).sort((a,b)=>parseInt(a.empNo||99999)-parseInt(b.empNo||99999));
+  const tbody=document.getElementById('m-tbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="9" class="empty-msg">該当者なし</td></tr>`;return}
+  tbody.innerHTML=list.map(m=>{
+    const ft=getFT(m.feeTypeId);
+    const rm=getR(m.id,mon);
+    const bs=m.status==='active'?'b-active':m.status==='sick'?'b-sick':m.status==='hiatus'?'b-hiatus':'b-retired';
+    const sl=m.status==='active'?'在籍':m.status==='sick'?'病欠':m.status==='hiatus'?'休会':'退会';
+    const rmColor=rm==='病欠'?['#f8d7da','#c0392b']:rm==='新入'?['#e0f0ff','#0066cc']:rm==='その他'?['#fff3cd','#856404']:rm==='休会'?['#f3e5f5','#7b1fa2']:rm==='退会'?['#fce4ec','#c0392b']:['#eee','#555'];
+    const rmBadge=rm?`<span style="font-size:.72rem;padding:2px 7px;border-radius:12px;font-weight:700;background:${rmColor[0]};color:${rmColor[1]}">${rm}</span>`:'—';
+    return `<tr>
+      <td style="font-family:monospace;color:var(--gray-600)">${m.empNo||'—'}</td>
+      <td><strong>${m.name}</strong></td>
+      <td style="font-size:.78rem;color:var(--gray-600)">${m.kana||'—'}</td>
+      <td>${ft?ft.name:'—'}</td>
+      <td><span class="${bs}">${sl}</span></td>
+      <td>${fmtD(m.joinDate)}</td><td>${fmtD(m.leaveDate)}</td>
+      <td>${rmBadge}</td>
+      <td style="white-space:nowrap;display:flex;gap:5px">
+        <button class="btn btn-sm btn-outline" onclick="openEdit('${m.id}')">編集</button>
+        <button class="btn btn-sm btn-danger" onclick="delM('${m.id}')">削除</button>
+      </td></tr>`;
+  }).join('');
+}
+
+// ===== REGISTER =====
+function popFS(id){document.getElementById(id).innerHTML=feeTypes.map(ft=>`<option value="${ft.id}">${ft.name}（¥${ft.amount.toLocaleString()}）</option>`).join('')}
+function registerMember(){
+  const empNo=document.getElementById('reg-empno').value.trim();
+  const name=document.getElementById('reg-name').value.trim();
+  const kana=document.getElementById('reg-kana').value.trim();
+  const feeId=document.getElementById('reg-fee').value;
+  const date=document.getElementById('reg-date').value;
+  const status=document.getElementById('reg-status').value;
+  const note=document.getElementById('reg-note').value.trim();
+  if(!empNo||!name||!date||!feeId){toast('⚠ コード・氏名・種別・入会日は必須です');return}
+  if(members.find(m=>m.empNo===empNo)){toast('⚠ このコード番号はすでに登録済みです');return}
+  members.push({id:genId(),empNo,name,kana,feeTypeId:feeId,joinDate:date,leaveDate:'',status,note});
+  persist();clearRegForm();toast(`✔ 登録しました：${empNo} ${name}`,'gold');
+}
+function clearRegForm(){
+  ['reg-empno','reg-name','reg-kana','reg-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('reg-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('reg-status').value='active';
+}
+
+// ===== EDIT =====
+function openEdit(id){
+  const m=members.find(x=>x.id===id);if(!m)return;
+  editingId=id;
+  document.getElementById('edit-empno').value=m.empNo||'';
+  document.getElementById('edit-name').value=m.name;
+  document.getElementById('edit-kana').value=m.kana||'';
+  document.getElementById('edit-join').value=m.joinDate||'';
+  document.getElementById('edit-leave').value=m.leaveDate||'';
+  document.getElementById('edit-status').value=m.status;
+  document.getElementById('edit-note').value=m.note||'';
+  const sel=document.getElementById('edit-fee');
+  sel.innerHTML=feeTypes.map(ft=>`<option value="${ft.id}">${ft.name}（¥${ft.amount.toLocaleString()}）</option>`).join('');
+  sel.value=m.feeTypeId;
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function closeModal(){document.getElementById('modal-overlay').style.display='none';editingId=null}
+function saveEdit(){
+  const m=members.find(x=>x.id===editingId);if(!m)return;
+  m.empNo=document.getElementById('edit-empno').value.trim();
+  m.name=document.getElementById('edit-name').value.trim();
+  m.kana=document.getElementById('edit-kana').value.trim();
+  m.feeTypeId=document.getElementById('edit-fee').value;
+  m.status=document.getElementById('edit-status').value;
+  m.joinDate=document.getElementById('edit-join').value;
+  m.leaveDate=document.getElementById('edit-leave').value;
+  m.note=document.getElementById('edit-note').value.trim();
+  persist();closeModal();renderMtbl();toast('✔ 更新しました');
+}
+function delM(id){
+  const m=members.find(x=>x.id===id);if(!m)return;
+  if(!confirm(`「${m.empNo} ${m.name}」を削除しますか？`))return;
+  members=members.filter(x=>x.id!==id);persist();renderMtbl();toast('削除しました');
+}
+
+// ===== MONTHLY =====
+function renderMonthly(){
+  const mon=document.getElementById('mon-month').value||curMon();
+  const sorted=members.filter(m=>m.status!=='retired').sort((a,b)=>parseInt(a.empNo||99999)-parseInt(b.empNo||99999));
+  const div=document.getElementById('mon-list');
+  if(!sorted.length){div.innerHTML='<p class="empty-msg">登録された組合員がいません</p>';return}
+  div.innerHTML=sorted.map(m=>{
+    const rm=getR(m.id,mon);
+    if(monFilter&&rm!==monFilter)return '';
+    const hl=rm==='病欠'?' hl-byo':rm==='その他'?' hl-son':rm==='新入'?' hl-shj':rm==='退会'?' hl-tai':rm==='休会'?' hl-kyu':'';
+    const ft=getFT(m.feeTypeId);
+    return `<div class="remark-row${hl}">
+      <span class="empno">${m.empNo||'—'}</span>
+      <span class="rname">${m.name}</span>
+      <span class="rtype">${ft?ft.name:''}</span>
+      <select id="rm-${m.id}" onchange="hlR(this,'${m.id}')">
+        <option value=""${rm===''?' selected':''}>—</option>
+        <option value="病欠"${rm==='病欠'?' selected':''}>病欠</option>
+        <option value="その他"${rm==='その他'?' selected':''}>その他</option>
+        <option value="新入"${rm==='新入'?' selected':''}>新入</option>
+        <option value="休会"${rm==='休会'?' selected':''}>休会</option>
+        <option value="退会"${rm==='退会'?' selected':''}>退会</option>
+      </select>
+    </div>`;
+  }).join('');
+}
+function hlR(sel,mid){
+  const v=sel.value,r=sel.closest('.remark-row');
+  r.className='remark-row'+(v==='病欠'?' hl-byo':v==='その他'?' hl-son':v==='新入'?' hl-shj':v==='退会'?' hl-tai':v==='休会'?' hl-kyu':'');
+}
+function fltMon(f){monFilter=f;renderMonthly()}
+function saveMon(){
+  const mon=document.getElementById('mon-month').value||curMon();
+  members.filter(m=>m.status!=='retired').forEach(m=>{
+    const sel=document.getElementById('rm-'+m.id);if(sel)setR(m.id,mon,sel.value);
+  });
+  persist();renderDash();toast('✔ 月次備考を保存しました','gold');
+}
+
+// ===== SETTINGS =====
+function renderSettings(){
+  document.getElementById('set-org').value=settings.orgName||'';
+  document.getElementById('set-company').value=settings.company||'';
+  document.getElementById('fee-list').innerHTML=feeTypes.map((ft,i)=>`
+    <div class="fee-item">
+      <input type="text" value="${ft.name}" placeholder="種別名" id="ftn-${i}">
+      <input type="number" value="${ft.amount}" placeholder="月額（円）" id="fta-${i}" min="0">
+      <button class="btn btn-danger btn-sm" onclick="rmFT(${i})">削除</button>
+    </div>`).join('');
+}
+function addFT(){feeTypes.push({id:'f_'+Date.now(),name:'新種別',amount:0});renderSettings()}
+function rmFT(i){if(feeTypes.length<=1){toast('最低1種別必要');return}feeTypes.splice(i,1);renderSettings()}
+function saveFTs(){
+  feeTypes.forEach((ft,i)=>{
+    ft.name=document.getElementById('ftn-'+i).value.trim()||ft.name;
+    ft.amount=parseInt(document.getElementById('fta-'+i).value)||0;
+  });persist();toast('✔ 会費設定を保存しました','gold');
+}
+function saveSettings(){
+  settings.orgName=document.getElementById('set-org').value.trim()||'カンツリー交通労働組合';
+  settings.company=document.getElementById('set-company').value.trim()||'カンツリー交通労働組合　組織部';
+  persist();toast('✔ 設定を保存しました','gold');
+}
+
+// ===== EXPORT / IMPORT =====
+function expData(){
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({members,feeTypes,monthlyData,settings},null,2));
+  a.download='union_backup_'+curMon()+'.json';a.click();
+}
+function impData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.members)members=d.members;if(d.feeTypes)feeTypes=d.feeTypes;
+      if(d.monthlyData)monthlyData=d.monthlyData;if(d.settings)settings=d.settings;
+      persist();renderDash();toast('✔ インポートしました','gold');
+    }catch(err){toast('⚠ JSONの読み込みに失敗しました')}
+  };r.readAsText(f);
+}
+
+// ===== PRINT =====
+function getMon(){return document.getElementById('print-month').value||curMon()}
+function rYear(mon){const [y]=mon.split('-');return `R${parseInt(y)-2018}`}
+function rLabel(mon){const [y,m]=mon.split('-');return `${rYear(mon)}　${parseInt(m)}月15日`}
+
+function buildS1(mon){
+  const org=settings.orgName||'カンツリー交通労働組合';
+  const cmp=settings.company||'カンツリー交通労働組合　組織部';
+  const [yr,mo]=mon.split('-');
+  const dateStr=`R${parseInt(yr)-2018} ${parseInt(mo)}月15日`;
+
+  const notRetired=members.filter(m=>m.status!=='retired').sort((a,b)=>parseInt(a.empNo||99999)-parseInt(b.empNo||99999));
+  // 状態が病欠(sick)のメンバーは月次備考の病欠と同扱い
+  const shukkin=notRetired.filter(m=>m.status!=='sick'&&!['病欠','その他','退会'].includes(getR(m.id,mon)));
+  const byoketsu=notRetired.filter(m=>m.status==='sick'||getR(m.id,mon)==='病欠');
+  const sonota=notRetired.filter(m=>m.status!=='sick'&&getR(m.id,mon)==='その他');
+  const shinjin=notRetired.filter(m=>m.status!=='sick'&&getR(m.id,mon)==='新入');
+
+  // 左列：出勤者（種別列追加）
+  const allShukkin=[...shukkin];
+  const leftRows=allShukkin.map((m,i)=>{
+    const rm=getR(m.id,mon);
+    const ft=getFT(m.feeTypeId);
+    const ftName=ft?ft.name:'';
+    const ftBg=ftName==='正社員'?'#e8f4ee':ftName==='嘱託12'?'#fff8e1':ftName==='定時制8'?'#e8f0ff':ftName==='その他'?'#fce4ec':'#f4f4f4';
+    return `<tr>
+      <td class="tc">${i+1}</td>
+      <td>${m.empNo||''}</td>
+      <td class="${rm==='その他'?'son':''}">${m.name}</td>
+      <td style="font-size:6pt;background:${ftBg};text-align:center">${ftName}</td>
+      <td class="${rm==='その他'?'son':''}">${rm||''}</td>
+    </tr>`;
+  }).join('');
+
+  // 右：種別集計
+  let totAmt=0,totN=0;
+  const feeRows=feeTypes.map(ft=>{
+    const tgt=notRetired.filter(m=>m.feeTypeId===ft.id&&getR(m.id,mon)!=='退会');
+    const n=tgt.length;const amt=n*ft.amount;totAmt+=amt;totN+=n;
+    if(!n)return '';
+    return `<tr><td>${ft.name}</td><td class="tr">${ft.amount.toLocaleString()}</td><td class="tr">${n}</td><td class="tr">${amt.toLocaleString()}</td></tr>`;
+  }).filter(Boolean).join('');
+
+  const byoRows=byoketsu.map(m=>{
+    const ft=getFT(m.feeTypeId);
+    return`<tr><td>${m.empNo||''}</td><td>${m.name}</td><td style="font-size:6pt;color:#555">${ft?ft.name:''}</td><td style="text-align:right;color:#c0392b;font-weight:700">-${ft?ft.amount.toLocaleString():0}</td></tr>`;
+  }).join('');
+  const sjRows=shinjin.map(m=>{
+    const ft=getFT(m.feeTypeId);
+    return`<tr><td>${m.empNo||''}</td><td>${m.name}</td><td style="font-size:6pt;color:#555">${ft?ft.name:''}</td><td style="text-align:right;color:#1a6b3c;font-weight:700">${ft?ft.amount.toLocaleString():0}</td></tr>`;
+  }).join('');
+
+  const shukkinN=shukkin.length+sonota.length;
+  const byoN=byoketsu.length;
+  const totalN=shukkinN+byoN;
+
+  return `<div class="print-page">
+  <div class="ph"><h1>${org}　給与天引き確認書</h1><div class="phr"><div class="phrg">${cmp}</div><div>備考　${dateStr}</div></div></div>
+  <div class="s1-wrap">
+    <div>
+      <table class="pt"><thead><tr><th></th><th>コード</th><th>氏名</th><th>種別</th><th>備考</th></tr></thead>
+      <tbody>${leftRows||'<tr><td colspan="5" class="tc">—</td></tr>'}</tbody></table>
+    </div>
+    <div>
+      <div class="sb"><div class="sb-h">種別別　月額集計</div>
+        <table class="sb-t">
+          <thead><tr><th>種別</th><th class="tr">単価</th><th class="tr">人数</th><th class="tr">合計</th></tr></thead>
+          <tbody>${feeRows}
+            <tr class="tot"><td>合　計</td><td class="tr">—</td><td class="tr">${totN}</td><td class="tr">${totAmt.toLocaleString()}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <table class="stat-tbl" style="margin-bottom:6pt">
+        <tr><th class="st-bl">出　勤</th><td>${shukkinN}</td></tr>
+        <tr><th class="st-rd">病　欠</th><td>${byoN}</td></tr>
+        <tr><th class="st-gy">総　数</th><td>${totalN}</td></tr>
+      </table>
+      ${byoketsu.length?`<div class="byobox"><div class="byobox-h">病欠者一覧</div>
+        <table class="byobox-t"><thead><tr><th>コード</th><th>氏名</th><th>種別</th><th class="tr">金額</th></tr></thead>
+        <tbody>${byoRows}</tbody></table></div>`:''}
+      ${shinjin.length?`<div class="sjbox"><div class="sjbox-h">新入組合員</div>
+        <table class="sjbox-t"><thead><tr><th>コード</th><th>氏名</th><th>種別</th><th class="tr">金額</th></tr></thead>
+        <tbody>${sjRows}</tbody></table></div>`:''}
+    </div>
+  </div>
+</div>`;
+}
+
+// 3列テーブルHTMLを生成するユーティリティ
+function make3ColTable(items, headerLabel){
+  // itemsは {no, empNo, name, feeName, remark, cls, strikethrough} の配列
+  const cols=3;
+  const perCol=Math.ceil(items.length/cols);
+  const col1=items.slice(0, perCol);
+  const col2=items.slice(perCol, perCol*2);
+  const col3=items.slice(perCol*2);
+  const maxRows=Math.max(col1.length, col2.length, col3.length);
+
+  const thStyle='background:#1a2744;color:#fff;padding:3pt 3.5pt;font-size:6pt;font-weight:600;border:.3pt solid #999';
+  const tdBase='padding:2.5pt 3.5pt;border:.3pt solid #ddd;font-size:6.5pt;white-space:nowrap';
+  const tdEven='padding:2.5pt 3.5pt;border:.3pt solid #ddd;font-size:6.5pt;white-space:nowrap;background:#f8f5ef';
+
+  const colorMap={byo:'#c0392b',shj:'#0066cc',son:'#856404',tai:'#999',kyu:'#7b1fa2','':`#1a2744`};
+
+  let html=`<table style="width:100%;border-collapse:collapse;table-layout:fixed">`;
+  html+=`<colgroup>
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+    <col style="width:1%">
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+    <col style="width:1%">
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+  </colgroup>`;
+  html+=`<thead><tr>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+    <td style="border:none"></td>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+    <td style="border:none"></td>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+  </tr></thead><tbody>`;
+
+  for(let r=0;r<maxRows;r++){
+    const bg=r%2===0?'#fff':'#f8f5ef';
+    const tdS=`padding:2.5pt 3.5pt;border:.3pt solid #ddd;font-size:6.5pt;white-space:nowrap;background:${bg}`;
+    html+=`<tr>`;
+    [col1,col2,col3].forEach((col,ci)=>{
+      const item=col[r];
+      if(ci>0) html+=`<td style="border:none;width:1%"></td>`;
+      if(item){
+        const c=colorMap[item.cls||'']||'#1a2744';
+        const strike=item.strikethrough?'text-decoration:line-through;':'';
+        const bold=item.remark?'font-weight:700;':'';
+        html+=`<td style="${tdS};color:#aaa;text-align:center">${item.no}</td>`;
+        html+=`<td style="${tdS};font-family:monospace">${item.empNo}</td>`;
+        html+=`<td style="${tdS};color:${c};${strike}">${item.name}</td>`;
+        html+=`<td style="${tdS};font-size:5.5pt;color:#555">${item.feeName}</td>`;
+        html+=`<td style="${tdS};color:${c};${bold}font-size:5.5pt">${item.remark||''}</td>`;
+      } else {
+        html+=`<td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td>`;
+      }
+    });
+    html+=`</tr>`;
+  }
+  html+=`</tbody></table>`;
+  return html;
+}
+
+function buildS2(mon){
+  const org=settings.orgName||'カンツリー交通労働組合';
+  const cmp=settings.company||'カンツリー交通労働組合　組織部';
+  const [yr,mo]=mon.split('-');
+  const sorted=members.slice().sort((a,b)=>parseInt(a.empNo||99999)-parseInt(b.empNo||99999));
+
+  const items=sorted.map((m,i)=>{
+    const rm=getR(m.id,mon);
+    const ft=getFT(m.feeTypeId);
+    const isSick=m.status==='sick'||rm==='病欠';
+    const isNew=rm==='新入';
+    const isSon=rm==='その他';
+    const isRetired=m.status==='retired'||rm==='退会';
+    const isHiatus=m.status==='hiatus'||rm==='休会';
+    const cls=isSick?'byo':isNew?'shj':isSon?'son':isRetired?'tai':isHiatus?'kyu':'';
+    const remark=rm||(m.status==='sick'?'病欠':m.status==='hiatus'?'休会':m.status==='retired'?'退会':'');
+    return {no:i+1, empNo:m.empNo||'', name:m.name, feeName:ft?ft.name:'', remark, cls, strikethrough:isRetired};
+  });
+
+  return `<div class="print-page">
+  <div class="ph"><h1>${org}　組合員コード番号表（入社日順）</h1><div class="phr"><div class="phrg">${cmp}</div><div>R${parseInt(yr)-2018}　${parseInt(mo)}月15日</div></div></div>
+  ${make3ColTable(items)}
+</div>`;
+}
+
+function buildS3(mon){
+  const org=settings.orgName||'カンツリー交通労働組合';
+  const cmp=settings.company||'カンツリー交通労働組合　組織部';
+  const [yr,mo]=mon.split('-');
+
+  // 種別ごとにグループ化して1つのフラットリストにまとめる
+  const items=[];
+  feeTypes.forEach(ft=>{
+    const grp=members.filter(m=>m.feeTypeId===ft.id&&m.status!=='retired')
+      .sort((a,b)=>parseInt(a.empNo||99999)-parseInt(b.empNo||99999));
+    if(!grp.length) return;
+    // グループ見出しをspecialアイテムとして挿入
+    items.push({isHeader:true, label:`【${ft.name}】　¥${ft.amount.toLocaleString()} × ${grp.length}名`});
+    grp.forEach(m=>{
+      const rm=getR(m.id,mon);
+      const isSick=m.status==='sick'||rm==='病欠';
+      const isNew=rm==='新入';
+      const isSon=rm==='その他';
+      const isHiatus=m.status==='hiatus'||rm==='休会';
+      const cls=isSick?'byo':isNew?'shj':isSon?'son':isHiatus?'kyu':'';
+      const remark=rm||(m.status==='sick'?'病欠':m.status==='hiatus'?'休会':'');
+      items.push({no:items.filter(x=>!x.isHeader).length+1, empNo:m.empNo||'', name:m.name, feeName:ft.name, remark, cls, strikethrough:false});
+    });
+  });
+
+  // グループ見出しを考慮した3列テーブル生成
+  const colorMap={byo:'#c0392b',shj:'#0066cc',son:'#856404',tai:'#999',kyu:'#7b1fa2','':`#1a2744`};
+  const thStyle='background:#1a2744;color:#fff;padding:3pt 3.5pt;font-size:6pt;font-weight:600;border:.3pt solid #999';
+
+  // 見出しなしアイテムだけ取り出してページ分割
+  const dataItems=items.filter(x=>!x.isHeader);
+  const cols=3;
+  const perCol=Math.ceil(dataItems.length/cols);
+  const col1=dataItems.slice(0,perCol);
+  const col2=dataItems.slice(perCol,perCol*2);
+  const col3=dataItems.slice(perCol*2);
+  const maxRows=Math.max(col1.length,col2.length,col3.length);
+
+  let html=`<table style="width:100%;border-collapse:collapse;table-layout:fixed">
+  <colgroup>
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+    <col style="width:1%">
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+    <col style="width:1%">
+    <col style="width:4%"><col style="width:8%"><col style="width:14%"><col style="width:8%"><col style="width:6%">
+  </colgroup>
+  <thead><tr>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+    <td style="border:none"></td>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+    <td style="border:none"></td>
+    <th style="${thStyle}">No</th><th style="${thStyle}">コード</th><th style="${thStyle}">氏名</th><th style="${thStyle}">種別</th><th style="${thStyle}">備考</th>
+  </tr></thead><tbody>`;
+
+  for(let r=0;r<maxRows;r++){
+    const bg=r%2===0?'#fff':'#f8f5ef';
+    const tdS=`padding:2.5pt 3.5pt;border:.3pt solid #ddd;font-size:6.5pt;white-space:nowrap;background:${bg}`;
+    html+=`<tr>`;
+    [col1,col2,col3].forEach((col,ci)=>{
+      if(ci>0) html+=`<td style="border:none;width:1%"></td>`;
+      const item=col[r];
+      if(item){
+        const c=colorMap[item.cls||'']||'#1a2744';
+        const bold=item.remark?'font-weight:700;':'';
+        // 種別グループ見出し行を前に表示（同じ種別の最初の行に付ける）
+        html+=`<td style="${tdS};color:#aaa;text-align:center">${item.no}</td>`;
+        html+=`<td style="${tdS};font-family:monospace">${item.empNo}</td>`;
+        html+=`<td style="${tdS};color:${c}">${item.name}</td>`;
+        html+=`<td style="${tdS};font-size:5.5pt;background:${item.feeName==='正社員'?'#e8f4ee':item.feeName==='嘱託12'?'#fff8e1':item.feeName==='定時制8'?'#e8f0ff':'#fce4ec'};color:#333">${item.feeName}</td>`;
+        html+=`<td style="${tdS};color:${c};${bold}font-size:5.5pt">${item.remark||''}</td>`;
+      } else {
+        html+=`<td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td><td style="${tdS}"></td>`;
+      }
+    });
+    html+=`</tr>`;
+  }
+  html+=`</tbody></table>`;
+
+  return `<div class="print-page">
+  <div class="ph"><h1>${org}　組合員コード番号表（種別順）</h1><div class="phr"><div class="phrg">${cmp}</div><div>R${parseInt(yr)-2018}　${parseInt(mo)}月15日</div></div></div>
+  ${html}
+</div>`;
+}
+
+function doP1(){
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=buildS1(getMon());
+  setTimeout(()=>window.print(),150);
+}
+function doP2(){
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=buildS2(getMon());
+  setTimeout(()=>window.print(),150);
+}
+function doP3(){
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=buildS3(getMon());
+  setTimeout(()=>window.print(),150);
+}
+function doBoth(){
+  const pa=document.getElementById('print-area');
+  pa.innerHTML=buildS1(getMon())+buildS2(getMon())+buildS3(getMon());
+  setTimeout(()=>window.print(),150);
+}
+
+
+// ===== 埋め込みデータ v7 =====
+const EMBEDDED_DATA = {"members":[{"id":"m1778653670446csj","empNo":"188","name":"岩部敦志","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301352iae","empNo":"226","name":"大賀志義三","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m001","empNo":"292","name":"髙木和紀","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m002","empNo":"327","name":"鈴木芳明","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670547cqz","empNo":"413","name":"酒井辰彦","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m1778654301363tmx","empNo":"485","name":"広岡由喜子","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m003","empNo":"486","name":"酒井伸高","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m004","empNo":"504","name":"増田一道","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m005","empNo":"522","name":"木下祐二","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670456stp","empNo":"544","name":"佐藤拓","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m006","empNo":"559","name":"大西英明","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m007","empNo":"561","name":"黒木正義","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301373gty","empNo":"623","name":"榎本隆夫","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301383gpx","empNo":"628","name":"岡田光央","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m008","empNo":"647","name":"深沢久宗","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m009","empNo":"666","name":"髙田裕章","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m010","empNo":"680","name":"岑吉敏夫","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m011","empNo":"681","name":"長沼信幸","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m012","empNo":"691","name":"兼田永史","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m013","empNo":"704","name":"村山恵一郎","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301393fwq","empNo":"719","name":"小林一枝","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m014","empNo":"734","name":"藤村信一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301403aji","empNo":"735","name":"山本等","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301413jfr","empNo":"737","name":"落合三津夫","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m015","empNo":"743","name":"猪狩信次","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m016","empNo":"750","name":"堀川洋道","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301423pzk","empNo":"753","name":"中嶋弘美","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301434ptj","empNo":"776","name":"奥田浩二","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m017","empNo":"777","name":"赤尾武光","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m1778654301444mhi","empNo":"782","name":"高本潤","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301454tbw","empNo":"799","name":"児玉俊也","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301464fkp","empNo":"806","name":"松井敬三","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m018","empNo":"818","name":"石川幸治","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m019","empNo":"825","name":"上野凌","feeTypeId":"f4","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301474hph","empNo":"832","name":"小池貢","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m020","empNo":"856","name":"加治屋崇","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m021","empNo":"857","name":"森泰二","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m022","empNo":"860","name":"宮代元樹","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m023","empNo":"875","name":"加藤仁一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m024","empNo":"876","name":"瀧健一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301484vpz","empNo":"891","name":"東政之","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m025","empNo":"894","name":"横田誠一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m026","empNo":"918","name":"田中均","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m027","empNo":"920","name":"船越亮平","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m028","empNo":"936","name":"佐元福世","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m029","empNo":"940","name":"松木敏子","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m030","empNo":"949","name":"古宮遼太","feeTypeId":"f4","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m031","empNo":"950","name":"吉田幸廣","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m032","empNo":"951","name":"渡邊浩司","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m033","empNo":"961","name":"松本将司","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m034","empNo":"969","name":"佐藤圭一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m035","empNo":"970","name":"木村隆","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m036","empNo":"974","name":"渡邊茂","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m037","empNo":"975","name":"丸山伸治","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m038","empNo":"980","name":"堀口常和","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m039","empNo":"983","name":"佐藤一彦","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m040","empNo":"986","name":"加藤博邦","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m041","empNo":"990","name":"廣井貴一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m042","empNo":"993","name":"佐藤博之","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670466uzw","empNo":"994","name":"山本啓史","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m043","empNo":"995","name":"髙橋一樹","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301494cak","empNo":"998","name":"矢口保夫","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m044","empNo":"999","name":"榆賀建助","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m045","empNo":"1001","name":"大場琢哉","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m046","empNo":"1004","name":"村上健一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m047","empNo":"1006","name":"成田英隆","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m048","empNo":"1007","name":"木下憲一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m049","empNo":"1009","name":"横手祐介","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m050","empNo":"1013","name":"鶴岡悠斗","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m051","empNo":"1014","name":"伊知地康弘","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m1778653670476exl","empNo":"1016","name":"後藤香","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m052","empNo":"1017","name":"手島博文","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m053","empNo":"1019","name":"中嶋竜幸","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670486gel","empNo":"1022","name":"三橋純","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m054","empNo":"1023","name":"岩間隆明","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m055","empNo":"1025","name":"本間彩","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m056","empNo":"1027","name":"上野美幸","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m057","empNo":"1031","name":"宮田友裕","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m058","empNo":"1035","name":"佐野功","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m059","empNo":"1037","name":"魚住雄作","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m060","empNo":"1038","name":"長山弘巳","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m061","empNo":"1039","name":"中山哲男","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m062","empNo":"1041","name":"三島孝","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301505vkz","empNo":"1042","name":"中原剛","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670517cmz","empNo":"1045","name":"市川映美","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m063","empNo":"1046","name":"梶山剛嗣","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301515ygn","empNo":"1048","name":"石原秀俊","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m064","empNo":"1051","name":"佐元一貴","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m065","empNo":"1054","name":"古宮城作","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m066","empNo":"1055","name":"内山直樹","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301525bwt","empNo":"1056","name":"井内源雄","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m067","empNo":"1057","name":"松浦義典","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m068","empNo":"1058","name":"伊藤健一","feeTypeId":"f4","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m069","empNo":"1063","name":"ムハマッドサタル","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m070","empNo":"1065","name":"髙木明夫","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m071","empNo":"1066","name":"本倉聖一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301535qaw","empNo":"1068","name":"米澤邦俊","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m072","empNo":"1070","name":"鈴木一平","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m073","empNo":"1072","name":"菅健司","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m074","empNo":"1074","name":"田中玲子","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301545oqr","empNo":"1076","name":"石井純","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778654301555uag","empNo":"1078","name":"佐藤公彦","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m075","empNo":"1080","name":"安河内裕也","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670527rhq","empNo":"1083","name":"中根美樹","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670537sqj","empNo":"1088","name":"大塚勝利","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670497iwm","empNo":"1089","name":"森嵜満義","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m076","empNo":"1096","name":"遠山布二子","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m077","empNo":"1098","name":"大澤一友","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778655511412aqa","empNo":"1099","name":"高森峻","kana":"","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"2025-05-15","status":"retired","note":"R7.5月退会"},{"id":"m1778654301565vre","empNo":"1100","name":"高橋幸子","kana":"","feeTypeId":"f2","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m078","empNo":"1101","name":"宮原樹里菜","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m079","empNo":"1103","name":"深井翔太","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m1778653670507zup","empNo":"1104","name":"國定隆","kana":"","feeTypeId":"f3","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m080","empNo":"1105","name":"石田雄人","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m081","empNo":"1106","name":"佐藤宏","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m082","empNo":"1111","name":"小暮清美","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m083","empNo":"1113","name":"落合宏之","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m084","empNo":"1115","name":"篠崎剛","feeTypeId":"f4","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m090","empNo":"1116","name":"福山雅文","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m091","empNo":"1119","name":"鈴木富雄","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m085","empNo":"1120","name":"中川海友","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m086","empNo":"1123","name":"山田博通","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m087","empNo":"1124","name":"相澤大輔","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m092","empNo":"1126","name":"中谷有希","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m088","empNo":"1127","name":"長澤勇利","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m089","empNo":"1128","name":"村上裕一","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m093","empNo":"1134","name":"坂口陽介","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m094","empNo":"1137","name":"二瓶仁一朗","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m095","empNo":"1139","name":"追川将太","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m096","empNo":"1141","name":"エル　イルマル","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m097","empNo":"1142","name":"立石岩根","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"sick","note":""},{"id":"m098","empNo":"1144","name":"黒木正巳","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m099","empNo":"1146","name":"佐々木勝利","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m100","empNo":"1151","name":"山本勇","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m101","empNo":"1152","name":"保坂国雄","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m102","empNo":"1153","name":"佐藤昭広","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m103","empNo":"1154","name":"増井茂","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m104","empNo":"1155","name":"小山昭成","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m105","empNo":"1156","name":"根来誠","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m106","empNo":"1159","name":"白石輝生","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""},{"id":"m107","empNo":"1162","name":"江口伸代","feeTypeId":"f1","joinDate":"2020-01-01","leaveDate":"","status":"active","note":""}],"feeTypes":[{"id":"f1","name":"正社員","amount":8000},{"id":"f2","name":"嘱託12","amount":7000},{"id":"f3","name":"定時制8","amount":6000},{"id":"f4","name":"その他","amount":3000}],"monthlyData":{"2025-05":{"m017":"病欠","m051":"病欠","m032":"病欠","m078":"病欠","m097":"病欠","m090":"病欠","m019":"その他","m030":"その他","m084":"その他","m106":"新入","m107":"新入","m1778653670547cqz":"病欠","m1778653670476exl":"病欠","m1778653670517cmz":"病欠","m1778654301393fwq":"病欠","m1778654301484vpz":"病欠","m1778655511412aqa":"退会"}},"settings":{"orgName":"カンツリー交通労働組合","company":"カンツリー交通労働組合　組織部"}};
+const EMBEDDED_VERSION = '2025-05-v7';
+function loadEmbedded(){
+  if(localStorage.getItem('kc_embedded_ver') !== EMBEDDED_VERSION){
+    members = EMBEDDED_DATA.members || [];
+    feeTypes = EMBEDDED_DATA.feeTypes || [];
+    monthlyData = EMBEDDED_DATA.monthlyData || {};
+    settings = EMBEDDED_DATA.settings || settings;
+    persist();
+    localStorage.setItem('kc_embedded_ver', EMBEDDED_VERSION);
+  }
+}
+
+// ===== INIT =====
+load();
+loadEmbedded();
+const now=new Date();
+const rn=now.getFullYear()-2018;
+document.getElementById('hdr-date').textContent=`R${rn} ${now.getMonth()+1}月`;
+document.getElementById('print-month').value=curMon();
+setTimeout(()=>{const mm=document.getElementById('mon-month');if(mm)mm.value=curMon();},0);
+popFS('reg-fee');
+document.getElementById('reg-date').value=now.toISOString().slice(0,10);
+renderDash();
+</script>
+</body>
+</html>
